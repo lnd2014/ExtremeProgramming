@@ -10,6 +10,16 @@ const routes = [
     name: 'home',
     component: () => import('../views/HomeView.vue')
   },
+  {
+    path: '/star',
+    name: 'star',
+    component: () => import('../views/StarView.vue')
+  },
+  {
+    path: '/details',
+    name: 'details',
+    component: () => import('../views/DetailView.vue')
+  },
 ]
 
 const router = new VueRouter({
