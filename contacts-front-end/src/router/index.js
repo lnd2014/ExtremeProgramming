@@ -4,6 +4,7 @@ import HomeView from '../views/HomeView.vue'
 
 Vue.use(VueRouter)
 
+//配置路由
 const routes = [
   {
     path: '/',
@@ -17,7 +18,7 @@ const routes = [
   },
   {
     path: '/details',
-    name: 'details',
+    name: 'my-details',
     component: () => import('../views/DetailView.vue')
   },
 ]
