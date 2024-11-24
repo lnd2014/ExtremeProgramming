@@ -107,12 +107,17 @@ export default {
 .box-card {
   margin-bottom: 20px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 15px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .card-header span {
@@ -121,7 +126,36 @@ export default {
   color: #303133;
 }
 
+/* 表格样式优化 */
+:deep(.el-table) {
+  margin-top: 15px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background-color: #f5f7fa;
+  color: #303133;
+  font-weight: bold;
+  padding: 12px 0;
+}
+
+:deep(.el-table td) {
+  padding: 12px 0;
+}
+
 .empty-block {
-  margin: 20px 0;
+  margin: 30px 0;
+  text-align: center;
+}
+
+:deep(.el-button--text) {
+  padding: 8px;
+  transition: all 0.3s;
+}
+
+:deep(.el-button--text:hover) {
+  background-color: rgba(64, 158, 255, 0.1);
+  border-radius: 4px;
 }
 </style>
