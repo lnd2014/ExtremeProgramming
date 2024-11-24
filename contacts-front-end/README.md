@@ -15,5 +15,10 @@ npm run serve
 npm run build
 ```
 
+### export excel file
+```
+npm install xlsx
+```
+
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
