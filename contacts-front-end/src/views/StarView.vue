@@ -1,51 +1,94 @@
 <template>
-    <div>
-      <p>我是收藏页面</p>
-      <el-table :data="nameList">
-        <el-table-column label="姓名" prop="name" ref="name"></el-table-column>
-        <el-table-column label="操作">
-          <!--操作栏需要template组件传值-->
+  <div class="star-view">
+    <el-card class="box-card">
+      <div slot="header" class="card-header">
+        <span>收藏联系人</span>
+      </div>
+
+      <el-table 
+        :data="starredContacts"
+        style="width: 100%"
+        :stripe="true"
+        :border="true"
+        v-loading="loading"
+      >
+        <el-table-column label="编号" prop="id" width="80" align="center"></el-table-column>
+        <el-table-column label="姓名" prop="name" align="center"></el-table-column>
+        <el-table-column label="收藏" width="80" align="center">
           <template slot-scope="scope">
-            <el-button @click="goToDetails(scope.row)">查看详情</el-button>
+            <el-button
+              type="text"
+              @click="cancelStar(scope.row)"
+            >
+              <i class="el-icon-star-on"
+                 style="color: #FFB800; font-size: 20px"
+              ></i>
+            </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120" align="center">
+          <template slot-scope="scope">
+            <el-button 
+              type="primary" 
+              size="small" 
+              icon="el-icon-view"
+              @click="goToDetails(scope.row)"
+            >查看详情</el-button>
           </template>
         </el-table-column>
       </el-table>
-    </div>
+
+      <div class="empty-block" v-if="starredContacts.length === 0">
+        <el-empty description="暂无收藏联系人"></el-empty>
+      </div>
+    </el-card>
+  </div>
 </template>
 
-<script>
 
+<script>
 export default {
   name: 'StarView',
-  components: {
-
-  },
-  data:function(){
+  data() {
     return {
-      rou:'/details/',
-      nameList:[
-          {
-            id:1,
-            name:'你好',
-          },
-          {
-            id:2,
-            name:'124',
-          }
-        ],
-    };
+      loading: false,
+      starredContacts: []
+    }
   },
-  methods:{
-    test(row){
-      // console.log(scope.row.id);
-      console.log(row.name);
+  created() {
+    // 获取收藏的联系人列表
+    this.getStarredContacts();
+  },
+  methods: {
+    getStarredContacts() {
+      this.loading = true;
+      // 从父组件或Vuex获取联系人列表
+      const allContacts = this.$parent.nameList || [];
+      this.starredContacts = allContacts.filter(contact => contact.star);
+      this.loading = false;
     },
-    transferMsg(row){
-      this.rou+='?name=' + this.row.name + '&id=' + this.row.id;
+    cancelStar(row) {
+      this.$confirm('确定取消收藏该联系人吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 更新父组件中的数据
+        const contact = this.$parent.nameList.find(item => item.id === row.id);
+        if (contact) {
+          contact.star = false;
+          // 更新当前视图的数据
+          this.getStarredContacts();
+          this.$message({
+            type: 'success',
+            message: '已取消收藏'
+          });
+        }
+      }).catch(() => {
+        // 取消操作
+      });
     },
-    //传送到details页面的方法
-    goToDetails(row){
-      //路由传值
+    goToDetails(row) {
       this.$router.push({
         path: "/details?name=" + row.name + "&id=" + row.id
       });
@@ -53,3 +96,32 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.star-view {
+  padding: 20px;
+  background-color: #f0f2f5;
+  min-height: 100vh;
+}
+
+.box-card {
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header span {
+  font-size: 18px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.empty-block {
+  margin: 20px 0;
+}
+</style>
