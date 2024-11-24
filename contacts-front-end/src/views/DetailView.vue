@@ -1,54 +1,72 @@
 <template>
   <div class="detail-view">
-    <el-card class="detail-card">
+    <el-card class="box-card">
       <div slot="header" class="card-header">
         <span>联系人详情</span>
-        <el-button icon="el-icon-back" type="text" @click="goBack">返回</el-button>
+        <el-button type="text" icon="el-icon-back" @click="goBack">返回</el-button>
       </div>
-      
-      <el-form 
-        label-width="80px" 
-        :model="contactInfo"
-        :rules="rules"
-        ref="contactForm"
-        status-icon
-      >
-        <el-form-item label="姓名">
-          <el-input v-model="contactInfo.name" disabled></el-input>
-        </el-form-item>
+
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="姓名">{{ contact.name }}</el-descriptions-item>
         
-        <el-form-item label="编号">
-          <el-input v-model="contactInfo.id" disabled></el-input>
-        </el-form-item>
-        
-        <el-form-item label="电话" prop="phone">
-          <el-input 
-            v-model="contactInfo.phone"
-            prefix-icon="el-icon-phone"
-          ></el-input>
-        </el-form-item>
-        
-        <el-form-item label="邮箱" prop="email">
-          <el-input 
-            v-model="contactInfo.email"
-            prefix-icon="el-icon-message"
-          ></el-input>
-        </el-form-item>
-        
-        <el-form-item label="收藏">
-          <el-switch
-            v-model="contactInfo.star"
-            active-color="#FFB800"
-            inactive-color="#909399"
-          </el-switch>
-        </el-form-item>
-        
-        <el-form-item class="form-buttons">
-          <el-button type="primary" icon="el-icon-check" @click="saveChanges('contactForm')">保存修改</el-button>
-          <el-button icon="el-icon-close" @click="resetForm('contactForm')">重置</el-button>
-        </el-form-item>
-      </el-form>
+        <!-- 电话号码区域 -->
+        <el-descriptions-item label="电话号码">
+          <div v-for="(phone, index) in contact.phones" :key="'phone'+index" class="info-item">
+            <span>{{ phone }}</span>
+            <div class="operations">
+              <el-button type="text" icon="el-icon-edit" @click="editInfo('phone', index)">编辑</el-button>
+              <el-button type="text" icon="el-icon-delete" @click="deleteInfo('phone', index)">删除</el-button>
+            </div>
+          </div>
+          <el-button type="text" icon="el-icon-plus" @click="addInfo('phone')">添加电话</el-button>
+        </el-descriptions-item>
+
+        <!-- 电子邮件区域 -->
+        <el-descriptions-item label="电子邮件">
+          <div v-for="(email, index) in contact.emails" :key="'email'+index" class="info-item">
+            <span>{{ email }}</span>
+            <div class="operations">
+              <el-button type="text" icon="el-icon-edit" @click="editInfo('email', index)">编辑</el-button>
+              <el-button type="text" icon="el-icon-delete" @click="deleteInfo('email', index)">删除</el-button>
+            </div>
+          </div>
+          <el-button type="text" icon="el-icon-plus" @click="addInfo('email')">添加邮箱</el-button>
+        </el-descriptions-item>
+
+        <!-- QQ区域 -->
+        <el-descriptions-item label="QQ">
+          <div v-for="(qq, index) in contact.qqs" :key="'qq'+index" class="info-item">
+            <span>{{ qq }}</span>
+            <div class="operations">
+              <el-button type="text" icon="el-icon-edit" @click="editInfo('qq', index)">编辑</el-button>
+              <el-button type="text" icon="el-icon-delete" @click="deleteInfo('qq', index)">删除</el-button>
+            </div>
+          </div>
+          <el-button type="text" icon="el-icon-plus" @click="addInfo('qq')">添加QQ</el-button>
+        </el-descriptions-item>
+
+        <!-- 地址区域 -->
+        <el-descriptions-item label="地址">
+          <div v-for="(address, index) in contact.addresses" :key="'address'+index" class="info-item">
+            <span>{{ address }}</span>
+            <div class="operations">
+              <el-button type="text" icon="el-icon-edit" @click="editInfo('address', index)">编辑</el-button>
+              <el-button type="text" icon="el-icon-delete" @click="deleteInfo('address', index)">删除</el-button>
+            </div>
+          </div>
+          <el-button type="text" icon="el-icon-plus" @click="addInfo('address')">添加地址</el-button>
+        </el-descriptions-item>
+      </el-descriptions>
     </el-card>
+
+    <!-- 添加/编辑信息的对话框 -->
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="30%">
+      <el-input v-model="editingValue" :placeholder="placeholderText"></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveInfo">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -56,64 +74,100 @@
 export default {
   name: 'DetailView',
   data() {
-    // 电话验证规则
-    const validatePhone = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入电话号码'));
-      } else if (!/^1[3-9]\d{9}$/.test(value)) {
-        callback(new Error('请输入正确的手机号码'));
-      } else {
-        callback();
-      }
-    };
-    
     return {
-      contactInfo: {
+      contact: {
         id: '',
         name: '',
-        phone: '',
-        email: '',
-        star: false
+        phones: [],
+        emails: [],
+        qqs: [],
+        addresses: []
       },
-      rules: {
-        phone: [
-          { required: true, validator: validatePhone, trigger: 'blur' }
-        ],
-        email: [
-          { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-          { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
-        ]
-      }
+      dialogVisible: false,
+      dialogTitle: '',
+      editingValue: '',
+      editingType: '',
+      editingIndex: -1,
+      placeholderText: ''
     }
   },
   created() {
-    // 从URL参数获取联系人信息
     const { id, name } = this.$route.query;
-    this.contactInfo.id = id;
-    this.contactInfo.name = name;
-    // 这里需要从父组件或者vuex获取完整的联系人信息
-    // TODO: 获取完整联系人信息的逻辑
+    this.contact.id = id;
+    this.contact.name = name;
+    this.getContactDetails();
   },
   methods: {
-    goBack() {
-      this.$router.push('/');
+    getContactDetails() {
+      // 从父组件或Vuex获取联系人详细信息
+      const contact = this.$parent.nameList.find(item => item.id === this.contact.id);
+      if (contact) {
+        this.contact = { ...contact };
+      }
     },
-    saveChanges(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          // TODO: 实现保存修改的逻辑
-          this.$message({
-            type: 'success',
-            message: '保存成功！'
-          });
-        } else {
-          this.$message.error('请正确填写表单！');
-          return false;
-        }
+    goBack() {
+      this.$router.go(-1);
+    },
+    addInfo(type) {
+      this.editingType = type;
+      this.editingIndex = -1;
+      this.editingValue = '';
+      this.dialogTitle = `添加${this.getTypeLabel(type)}`;
+      this.placeholderText = `请输入${this.getTypeLabel(type)}`;
+      this.dialogVisible = true;
+    },
+    editInfo(type, index) {
+      this.editingType = type;
+      this.editingIndex = index;
+      this.editingValue = this.contact[type + 's'][index];
+      this.dialogTitle = `编辑${this.getTypeLabel(type)}`;
+      this.placeholderText = `请输入${this.getTypeLabel(type)}`;
+      this.dialogVisible = true;
+    },
+    deleteInfo(type, index) {
+      this.$confirm(`确定删除该${this.getTypeLabel(type)}吗？`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.contact[type + 's'].splice(index, 1);
+        this.updateContact();
       });
     },
-    resetForm(formName) {
-      this.$refs[formName].resetFields();
+    saveInfo() {
+      if (!this.editingValue.trim()) {
+        this.$message.warning('输入内容不能为空');
+        return;
+      }
+
+      const arrayName = this.editingType + 's';
+      if (this.editingIndex === -1) {
+        // 添加新信息
+        this.contact[arrayName].push(this.editingValue);
+      } else {
+        // 编辑现有信息
+        this.contact[arrayName][this.editingIndex] = this.editingValue;
+      }
+
+      this.updateContact();
+      this.dialogVisible = false;
+    },
+    updateContact() {
+      // 更新父组件中的数据
+      const index = this.$parent.nameList.findIndex(item => item.id === this.contact.id);
+      if (index !== -1) {
+        this.$parent.nameList[index] = { ...this.contact };
+      }
+      this.$message.success('更新成功');
+    },
+    getTypeLabel(type) {
+      const labels = {
+        phone: '电话号码',
+        email: '电子邮件',
+        qq: 'QQ',
+        address: '地址'
+      };
+      return labels[type];
     }
   }
 }
@@ -126,9 +180,8 @@ export default {
   min-height: 100vh;
 }
 
-.detail-card {
-  max-width: 600px;
-  margin: 0 auto;
+.box-card {
+  margin-bottom: 20px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
 }
 
@@ -144,16 +197,20 @@ export default {
   color: #303133;
 }
 
-.form-buttons {
-  text-align: center;
-  margin-top: 30px;
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid #EBEEF5;
 }
 
-.el-form-item {
-  margin-bottom: 22px;
+.info-item:last-child {
+  border-bottom: none;
 }
 
-.el-input {
-  width: 100%;
+.operations {
+  display: flex;
+  gap: 10px;
 }
 </style>
