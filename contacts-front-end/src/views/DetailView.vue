@@ -33,18 +33,6 @@
           <el-button type="text" icon="el-icon-plus" @click="addInfo('email')">添加邮箱</el-button>
         </el-descriptions-item>
 
-        <!-- QQ区域 -->
-        <el-descriptions-item label="QQ">
-          <div v-for="(qq, index) in contact.qqs" :key="'qq'+index" class="info-item">
-            <span>{{ qq }}</span>
-            <div class="operations">
-              <el-button type="text" icon="el-icon-edit" @click="editInfo('qq', index)">编辑</el-button>
-              <el-button type="text" icon="el-icon-delete" @click="deleteInfo('qq', index)">删除</el-button>
-            </div>
-          </div>
-          <el-button type="text" icon="el-icon-plus" @click="addInfo('qq')">添加QQ</el-button>
-        </el-descriptions-item>
-
         <!-- 地址区域 -->
         <el-descriptions-item label="地址">
           <div v-for="(address, index) in contact.addresses" :key="'address'+index" class="info-item">
@@ -164,7 +152,6 @@ export default {
       const labels = {
         phone: '电话号码',
         email: '电子邮件',
-        qq: 'QQ',
         address: '地址'
       };
       return labels[type];
@@ -183,12 +170,17 @@ export default {
 .box-card {
   margin-bottom: 20px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 15px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .card-header span {
@@ -201,8 +193,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #EBEEF5;
+  transition: background-color 0.3s;
+}
+
+.info-item:hover {
+  background-color: #f5f7fa;
 }
 
 .info-item:last-child {
@@ -211,6 +208,58 @@ export default {
 
 .operations {
   display: flex;
-  gap: 10px;
+  gap: 12px;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.info-item:hover .operations {
+  opacity: 1;
+}
+
+/* 描述列表样式优化 */
+:deep(.el-descriptions) {
+  padding: 20px;
+}
+
+:deep(.el-descriptions__label) {
+  width: 120px;
+  color: #606266;
+  font-weight: bold;
+  background-color: #f5f7fa;
+}
+
+:deep(.el-descriptions__content) {
+  padding: 12px 15px;
+}
+
+:deep(.el-button--text) {
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+:deep(.el-button--text:hover) {
+  color: #409EFF;
+  background-color: rgba(64, 158, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* 对话框样式优化 */
+:deep(.el-dialog) {
+  border-radius: 8px;
+}
+
+:deep(.el-dialog__header) {
+  padding: 20px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+:deep(.el-dialog__body) {
+  padding: 30px 20px;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 15px 20px;
+  border-top: 1px solid #ebeef5;
 }
 </style>
