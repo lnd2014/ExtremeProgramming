@@ -15,7 +15,7 @@ npm run serve
 npm run build
 ```
 
-### export excel file
+### Export excel file
 ```
 npm install xlsx
 ```
