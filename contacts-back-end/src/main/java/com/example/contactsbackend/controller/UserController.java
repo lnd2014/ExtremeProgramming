@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static java.lang.Integer.parseInt;
+
 @CrossOrigin
 @RestController
 public class UserController {
@@ -41,10 +44,19 @@ public class UserController {
 
     //根据UID查询所有电话号码
     @GetMapping("/details/{uid}")
-    public List<Phone> details(@PathVariable int uid) {
-        List<User> userList = userMapper.selectUsersAndPhone(uid);
+    //接收int参数报错，尝试在controller里接收String传给mapper层int
+    public List<Phone> details(@PathVariable String uid) {
+        List<User> userList = userMapper.selectUsersAndPhone(Integer.parseInt(uid.trim()));
         List<Phone> phoneList = userList.get(0).getPhone();
         return phoneList;
+    }
+
+    @GetMapping("/withPhone")
+    public List<User> readAllUserswithPhone()
+    {
+        List<User> users = userMapper.selectAllUsersAndPhone();
+        System.out.println("号码是"+users.get(0).getPhone().get(0).getNumber());
+        return users;
     }
 
 }

@@ -17,14 +17,19 @@ public class PhoneController {
     PhoneMapper phoneMapper;
 
     @PutMapping("/update-number/{id}")
-    public String updateNumber(@PathVariable Integer id, @RequestBody Phone phone) {
-        phoneMapper.updateNumberByUid(phone.getUid(),id, phone.getNumber());
-        return "更新成功";
+    public Phone updateNumber(@PathVariable String id, @RequestBody Phone phone) {
+        phoneMapper.updateNumberByUid(phone.getUid(),Integer.parseInt(id), phone.getNumber());
+        return phone;
     }
-    @DeleteMapping("/{id}")
-    public String deleteById(@PathVariable Integer id) {
-        phoneMapper.deleteById(id);
-        return "删除成功";
+    @DeleteMapping("details/{id}")
+    public Boolean deleteById(@PathVariable String id) {
+        phoneMapper.deleteById(Integer.parseInt(id.trim()));
+        return true;
+    }
+    @PostMapping("/create-phone")
+    public Boolean createPhone(@RequestBody Phone phone) {
+        phoneMapper.insert(phone);
+        return true;
     }
 
 

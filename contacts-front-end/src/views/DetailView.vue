@@ -12,10 +12,10 @@
         <!-- 电话号码区域 -->
         <el-descriptions-item label="电话号码">
           <div v-for="(phone, index) in contact.phones" :key="'phone'+index" class="info-item">
-            <span>{{ phone }}</span>
+            <span>{{ phone.number }}</span>
             <div class="operations">
-              <el-button type="text" icon="el-icon-edit" @click="editInfo('phone', index)">编辑</el-button>
-              <el-button type="text" icon="el-icon-delete" @click="deleteInfo('phone', index)">删除</el-button>
+              <el-button type="text" icon="el-icon-edit" @click="editInfo('phone', phone, index)">编辑</el-button>
+              <el-button type="text" icon="el-icon-delete" @click="deleteInfo('phone', phone)">删除</el-button>
             </div>
           </div>
           <el-button type="text" icon="el-icon-plus" @click="addInfo('phone')">添加电话</el-button>
@@ -71,6 +71,7 @@
 </template>
 
 <script>
+import request from '@/utils/request'
 export default {
   name: 'DetailView',
   data() {
@@ -78,7 +79,11 @@ export default {
       contact: {
         id: '',
         name: '',
-        phones: [],
+        phones: [{
+          id:'',
+          uid:'',
+          number:''
+        }],
    
       },
       dialogVisible: false,
@@ -86,50 +91,90 @@ export default {
       editingValue: '',
       editingType: '',
       editingIndex: -1,
-      placeholderText: ''
+      placeholderText: '',
+      editingPhone:{
+        id:'',
+        uid:'',
+        number:''
+      }
     }
   },
   created() {
+    //从路由处获取该页面的id和名称
     const { id, name } = this.$route.query;
     this.contact.id = id;
     this.contact.name = name;
-    this.getContactDetails();
+    //去后端获取电话表
+    this.load(id);
   },
   methods: {
-    getContactDetails() {
-      // 从父组件或Vuex获取联系人详细信息
-      const contact = this.$parent.nameList.find(item => item.id === this.contact.id);
-      if (contact) {
-        this.contact = { ...contact };
-      }
+    //加载
+    load() {
+      var path = 'details/' +this.contact.id; 
+      request.get(path).then(
+        res=>{
+          this.contact.phones = res;
+        }
+      )
+      //刷新页面时重置信息
+      this.editingPhone = {
+        id:'',
+        uid:'',
+        number:''
+      };
+    },
+    //更新值后刷新页面
+    update(phone){
+      var id = phone.id;
+      console.log(id);
+      var path = '/update-number/' + id;
+      request.put(path,phone).then(
+        res => {
+          this.load();
+        }
+      )
     },
     goBack() {
       this.$router.go(-1);
     },
     addInfo(type) {
       this.editingType = type;
+      if(this.editingType=='phone'){
+        this.editingPhone.uid = this.contact.id;
+      }
       this.editingIndex = -1;
       this.editingValue = '';
       this.dialogTitle = `添加${this.getTypeLabel(type)}`;
       this.placeholderText = `请输入${this.getTypeLabel(type)}`;
       this.dialogVisible = true;
     },
-    editInfo(type, index) {
+    editInfo(type, phone,index) {
       this.editingType = type;
+      if(this.editingType=='phone'){
+        //传入当前行的值
+        this.editingPhone=phone;
+      }
+      //由于v-for顺序渲染,显示的index实际上是contact数组里的坐标
       this.editingIndex = index;
-      this.editingValue = this.contact[type + 's'][index];
+      this.editingValue = this.contact[type + 's'][index].number;
       this.dialogTitle = `编辑${this.getTypeLabel(type)}`;
       this.placeholderText = `请输入${this.getTypeLabel(type)}`;
       this.dialogVisible = true;
     },
-    deleteInfo(type, index) {
+    deleteInfo(type, phone) {
+      var id = phone.id;
       this.$confirm(`确定删除该${this.getTypeLabel(type)}吗？`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.contact[type + 's'].splice(index, 1);
-        this.updateContact();
+        //js里需要访问对象记得自定义路径,不支持直接在路径里写表达式
+        var path = 'details/' + id;
+        request.delete(path).then(
+          res => {
+            this.load();
+          }
+        )
       });
     },
     saveInfo() {
@@ -138,16 +183,22 @@ export default {
         return;
       }
 
-      const arrayName = this.editingType + 's';
+      // const arrayName = this.editingType + 's';
+      this.editingPhone.number=this.editingValue;
       if (this.editingIndex === -1) {
         // 添加新信息
-        this.contact[arrayName].push(this.editingValue);
+        console.log(this.editingPhone);
+        request.post('/create-phone',this.editingPhone).then(
+          res=>{
+            this.load();
+          }
+        );
       } else {
         // 编辑现有信息
-        this.contact[arrayName][this.editingIndex] = this.editingValue;
+        this.update(this.editingPhone);
       }
 
-      this.updateContact();
+      
       this.dialogVisible = false;
     },
     updateContact() {
@@ -162,7 +213,6 @@ export default {
       const labels = {
         phone: '电话号码',
         email: '电子邮件',
-        qq: 'QQ',
         address: '地址'
       };
       return labels[type];
@@ -181,12 +231,17 @@ export default {
 .box-card {
   margin-bottom: 20px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 15px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .card-header span {
@@ -199,8 +254,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 5px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #EBEEF5;
+  transition: background-color 0.3s;
+}
+
+.info-item:hover {
+  background-color: #f5f7fa;
 }
 
 .info-item:last-child {
@@ -209,6 +269,58 @@ export default {
 
 .operations {
   display: flex;
-  gap: 10px;
+  gap: 12px;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.info-item:hover .operations {
+  opacity: 1;
+}
+
+/* 描述列表样式优化 */
+:deep(.el-descriptions) {
+  padding: 20px;
+}
+
+:deep(.el-descriptions__label) {
+  width: 120px;
+  color: #606266;
+  font-weight: bold;
+  background-color: #f5f7fa;
+}
+
+:deep(.el-descriptions__content) {
+  padding: 12px 15px;
+}
+
+:deep(.el-button--text) {
+  padding: 0 8px;
+  font-size: 14px;
+}
+
+:deep(.el-button--text:hover) {
+  color: #409EFF;
+  background-color: rgba(64, 158, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* 对话框样式优化 */
+:deep(.el-dialog) {
+  border-radius: 8px;
+}
+
+:deep(.el-dialog__header) {
+  padding: 20px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+:deep(.el-dialog__body) {
+  padding: 30px 20px;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 15px 20px;
+  border-top: 1px solid #ebeef5;
 }
 </style>

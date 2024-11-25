@@ -76,24 +76,24 @@ export default {
     return {
       nameList:[
         {
-          id:1,
+          id:'',
           name: '',
-          is_star: true
+          is_star: false,
+          phone:[{
+            id:'',
+            uid:'',
+            number:''
+        }]
         },
-        {
-          id: 2,
-          name: '',
-          is_star: false
-        }
       ],
     };
   },
   methods:{
     load(){
-      request.get("http://localhost:8080/").then(
+      request.get('/withPhone').then(
         res=>{
           this.nameList = res
-          console.log('load回调:'+this.nameList[0].is_star)
+          console.log('load回调:'+this.nameList[0].phone[0].number)
         }
       )
     },
@@ -125,8 +125,7 @@ export default {
     exportContacts() {
       const data = this.nameList.map(contact => ({
         姓名: contact.name,
-        电话: contact.phone,
-        邮箱: contact.email,
+        默认电话: contact.phone?.[0].number,
         是否收藏: contact.is_star ? '是' : '否'
       }));
       
@@ -148,7 +147,6 @@ export default {
           id: this.nameList.length + index + 1,
           name: item.姓名,
           phone: item.电话,
-          email: item.邮箱,
           star: item.是否收藏 === '是'
         }));
         
@@ -171,12 +169,17 @@ export default {
 .box-card {
   margin-bottom: 20px;
   box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 15px 20px;
+  background-color: #fff;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .card-header span {
@@ -187,19 +190,39 @@ export default {
 
 .operation-buttons {
   display: flex;
-  gap: 10px;
+  gap: 12px;
 }
 
 .operation-buttons .el-button {
-  padding: 8px 15px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.operation-buttons .el-button:hover {
+  transform: translateY(-1px);
 }
 
 .operation-buttons .el-button [class^="el-icon-"] {
-  margin-right: 5px;
+  margin-right: 6px;
 }
 
 .el-table {
   margin-top: 15px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* 表格样式优化 */
+:deep(.el-table th) {
+  background-color: #f5f7fa;
+  color: #303133;
+  font-weight: bold;
+  padding: 12px 0;
+}
+
+:deep(.el-table td) {
+  padding: 12px 0;
 }
 
 /* 上传按钮样式优化 */
@@ -209,6 +232,10 @@ export default {
 
 .upload-demo .el-upload {
   display: block;
+}
+
+.upload-demo .el-button {
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
 }
 
 .upload-demo .el-upload-list {
