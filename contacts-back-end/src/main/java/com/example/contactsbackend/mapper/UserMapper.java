@@ -12,7 +12,7 @@ public interface UserMapper extends BaseMapper<User> {
     List<User> selectByStar();
 
     @Update("update users set is_star=#{is_star} where id=#{id}")
-    int updateStarById(@Param("name") String name, @Param("id") Integer id, @Param("is_star") Boolean is_star);
+    int updateStarById(@Param("name") String name, @Param("id") Integer id, @Param("is_star") Boolean star);
 
     @Select("select * from users where id=#{id}")
     @Results(value = {

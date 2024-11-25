@@ -6,9 +6,8 @@ import com.example.contactsbackend.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-
+@CrossOrigin
 @RestController
 public class UserController {
     @Autowired
@@ -19,7 +18,7 @@ public class UserController {
     {
         //MybatisPlus查询方法
         List<User> users = userMapper.selectList(null);
-        System.out.println(users.get(1).getIs_star());
+        System.out.println(users.get(1).getStar());
         return users;
     }
 
@@ -33,14 +32,11 @@ public class UserController {
     }
     //取消或加入收藏
     @PutMapping("/star/change")
-    public String updateStar(@RequestBody User user)
+    public User updateStar(@RequestBody User user)
     {
-        boolean val = user.getIs_star();
-        System.out.println(val);
-        user.setIs_star(!val);
-        System.out.println(user.getIs_star());
-        userMapper.updateStarById(user.getName(),user.getId(),user.getIs_star());
-        return "更新成功";
+        Boolean val = user.getStar();
+        userMapper.updateStarById(user.getName(),user.getId(),val);
+        return user;
     }
 
     //根据UID查询所有电话号码
