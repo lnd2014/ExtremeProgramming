@@ -40,8 +40,8 @@
               type="text"
               @click="toggleFavorite(scope.row)"
             >
-              <i :class="scope.row.star ? 'el-icon-star-on' : 'el-icon-star-off'"
-                 :style="{ color: scope.row.star ? '#FFB800' : '#909399', fontSize: '20px' }"
+              <i :class="scope.row.is_star ? 'el-icon-star-on' : 'el-icon-star-off'"
+                 :style="{ color: scope.row.is_star ? '#FFB800' : '#909399', fontSize: '20px' }"
               ></i>
             </el-button>
           </template>
@@ -65,34 +65,58 @@
 
 <script>
 import * as XLSX from 'xlsx'
+import request from '@/utils/request'
 
 export default {
   name: 'HomeView',
+  created(){
+    this.load()
+  },
   data: function(){
     return {
       nameList:[
         {
-          id: 1,
-          name: 'A',
-          star: true
+          id:1,
+          name: '',
+          is_star: true
         },
         {
           id: 2,
-          name: 'B',
-          star: false
+          name: '',
+          is_star: false
         }
       ],
     };
   },
   methods:{
+    load(){
+      request.get("http://localhost:8080/").then(
+        res=>{
+          this.nameList = res
+          console.log('load回调:'+this.nameList[0].is_star)
+        }
+      )
+    },
+    onStar(data)
+    {
+      console.log(data);
+      request.put("/star/change", data).then(
+        res=>{
+          console.log('onStarload前::'+this.nameList[0].is_star)
+          this.load();
+          console.log('onStar回调:'+this.nameList[0].is_star)
+        }
+      )
+    },
     goToDetails(row){
       this.$router.push({
         path: "/details?name=" + row.name + "&id=" + row.id
       });
     },
     toggleFavorite(row) {
-      const action = row.star ? '取消收藏' : '收藏';
-      row.star = !row.star;
+      const action = row.is_star ? '取消收藏' : '收藏';
+      row.is_star = !row.is_star;
+      this.onStar(row);
       this.$message({
         type: 'success',
         message: `已${action}该联系人`
@@ -103,7 +127,7 @@ export default {
         姓名: contact.name,
         电话: contact.phone,
         邮箱: contact.email,
-        是否收藏: contact.star ? '是' : '否'
+        是否收藏: contact.is_star ? '是' : '否'
       }));
       
       const ws = XLSX.utils.json_to_sheet(data);

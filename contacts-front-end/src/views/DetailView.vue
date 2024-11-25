@@ -21,7 +21,7 @@
           <el-button type="text" icon="el-icon-plus" @click="addInfo('phone')">添加电话</el-button>
         </el-descriptions-item>
 
-        <!-- 电子邮件区域 -->
+        <!-- 电子邮件区域
         <el-descriptions-item label="电子邮件">
           <div v-for="(email, index) in contact.emails" :key="'email'+index" class="info-item">
             <span>{{ email }}</span>
@@ -33,7 +33,7 @@
           <el-button type="text" icon="el-icon-plus" @click="addInfo('email')">添加邮箱</el-button>
         </el-descriptions-item>
 
-        <!-- QQ区域 -->
+        QQ区域
         <el-descriptions-item label="QQ">
           <div v-for="(qq, index) in contact.qqs" :key="'qq'+index" class="info-item">
             <span>{{ qq }}</span>
@@ -43,9 +43,9 @@
             </div>
           </div>
           <el-button type="text" icon="el-icon-plus" @click="addInfo('qq')">添加QQ</el-button>
-        </el-descriptions-item>
+        </el-descriptions-item>-->
 
-        <!-- 地址区域 -->
+        <!-- 地址区域
         <el-descriptions-item label="地址">
           <div v-for="(address, index) in contact.addresses" :key="'address'+index" class="info-item">
             <span>{{ address }}</span>
@@ -55,9 +55,9 @@
             </div>
           </div>
           <el-button type="text" icon="el-icon-plus" @click="addInfo('address')">添加地址</el-button>
-        </el-descriptions-item>
+        </el-descriptions-item>-->
       </el-descriptions>
-    </el-card>
+    </el-card>  
 
     <!-- 添加/编辑信息的对话框 -->
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="30%">
@@ -79,9 +79,7 @@ export default {
         id: '',
         name: '',
         phones: [],
-        emails: [],
-        qqs: [],
-        addresses: []
+   
       },
       dialogVisible: false,
       dialogTitle: '',
